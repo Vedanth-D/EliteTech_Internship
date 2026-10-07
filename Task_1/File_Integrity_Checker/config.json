@@ -1,0 +1,48 @@
+{
+  "version": "2.1",
+  "approved_folders": [
+    "E:\\File_Integrity_Checker\\demo\\demo_target"
+  ],
+  "auto_select_targets": false,
+  "default_paths_windows": [
+    "C:\\Windows\\System32\\drivers\\etc",
+    "demo/demo_target"
+  ],
+  "default_paths_linux": [
+    "/etc",
+    "/usr/bin",
+    "~/Documents",
+    "~/.ssh"
+  ],
+  "ignore_dirs": [
+    ".git",
+    "__pycache__",
+    ".pytest_cache",
+    ".venv",
+    "venv",
+    ".fim_vault",
+    "node_modules"
+  ],
+  "ignore_files": [
+    ".fim_baseline.json",
+    ".fim_hmac.sig",
+    ".fim_secret.key",
+    "events.log",
+    "fim_security_alerts.log",
+    "fim_incident_report.html",
+    "fim_incident_report.pdf",
+    ".DS_Store"
+  ],
+  "ignore_extensions": [
+    ".pyc",
+    ".log",
+    ".tmp",
+    ".swp"
+  ],
+  "shannon_entropy_threshold": 7.2,
+  "burst_time_window_seconds": 10,
+  "burst_file_count_threshold": 5,
+  "auto_learning_period_hours": 24,
+  "desktop_notifications_enabled": true,
+  "auto_export_pdf_reports": true
+}
