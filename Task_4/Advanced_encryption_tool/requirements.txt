@@ -1,0 +1,2 @@
+# AegisVault Dependencies
+cryptography>=44.0.0
