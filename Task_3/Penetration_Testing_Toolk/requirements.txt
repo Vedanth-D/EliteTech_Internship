@@ -1,0 +1,4 @@
+# Modular Security Audit & Asset Inventory Framework
+# Standard library is primary, optional dependencies for CLI enhancement:
+click>=8.0.0
+rich>=12.0.0

@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NetAudit Enterprise Security Audit Report</title>
+    <style>
+        :root {
+            --bg-dark: #0b0f19;
+            --card-bg: #151c2c;
+            --card-border: #232d42;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --primary: #38bdf8;
+            --sev-critical: #ef4444;
+            --sev-high: #f97316;
+            --sev-medium: #eab308;
+            --sev-low: #3b82f6;
+            --sev-info: #64748b;
+            --sev-safe: #22c55e;
+        }
+
+        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; }
+        body { background-color: var(--bg-dark); color: var(--text-main); margin: 0; padding: 2rem 1.5rem; line-height: 1.5; }
+        .container { max-width: 1280px; margin: 0 auto; }
+
+        /* Top Header Navigation */
+        .top-header {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 1.75rem 2rem;
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5);
+        }
+        .brand-title { font-size: 1.75rem; font-weight: 800; color: #fff; margin: 0; letter-spacing: -0.025em; display: flex; align-items: center; gap: 0.75rem; }
+        .brand-title span { color: var(--primary); }
+        .subtitle { color: var(--text-muted); margin: 0.35rem 0 0 0; font-size: 0.9rem; }
+
+        /* Risk Gauge Badge */
+        .risk-gauge {
+            text-align: right;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--card-border);
+            padding: 0.75rem 1.25rem;
+            border-radius: 12px;
+        }
+        .risk-score-num { font-size: 2.2rem; font-weight: 900; line-height: 1; }
+        .risk-critical { color: var(--sev-critical); }
+        .risk-high { color: var(--sev-high); }
+        .risk-medium { color: var(--sev-medium); }
+        .risk-low { color: var(--sev-low); }
+        .risk-safe { color: var(--sev-safe); }
+        .risk-label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-top: 0.2rem; }
+
+        /* Metrics Cards Grid */
+        .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1.25rem; margin-bottom: 2rem; }
+        .metric-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 1.25rem; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+        .metric-title { font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+        .metric-value { font-size: 1.8rem; font-weight: 800; margin-top: 0.5rem; }
+
+        /* Severity Pill Counter Badges */
+        .sev-pill { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.25rem 0.65rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
+        .pill-CRITICAL { background: rgba(239, 68, 68, 0.15); color: var(--sev-critical); border: 1px solid rgba(239, 68, 68, 0.3); }
+        .pill-HIGH { background: rgba(249, 115, 22, 0.15); color: var(--sev-high); border: 1px solid rgba(249, 115, 22, 0.3); }
+        .pill-MEDIUM { background: rgba(234, 179, 8, 0.15); color: var(--sev-medium); border: 1px solid rgba(234, 179, 8, 0.3); }
+        .pill-LOW { background: rgba(59, 130, 246, 0.15); color: var(--sev-low); border: 1px solid rgba(59, 130, 246, 0.3); }
+        .pill-INFO { background: rgba(100, 116, 139, 0.15); color: var(--sev-info); border: 1px solid rgba(100, 116, 139, 0.3); }
+
+        /* Table Styling */
+        .section-header { display: flex; justify-content: space-between; align-items: center; margin: 2rem 0 1rem 0; }
+        .section-title { font-size: 1.25rem; font-weight: 700; color: #fff; margin: 0; }
+        
+        .table-container { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; overflow: hidden; margin-bottom: 2rem; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem; }
+        th { background: #0f172a; color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; padding: 1rem 1.25rem; border-bottom: 1px solid var(--card-border); }
+        td { padding: 1rem 1.25rem; border-bottom: 1px solid var(--card-border); color: var(--text-main); }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: rgba(255,255,255,0.02); }
+
+        code { background: #090d16; padding: 0.2rem 0.45rem; border-radius: 6px; font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace; font-size: 0.85em; color: var(--primary); border: 1px solid #1e293b; }
+
+        /* Finding Card Component */
+        .finding-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.25rem; box-shadow: 0 4px 12px rgba(0,0,0,0.2); transition: transform 0.15s ease; }
+        .finding-card:hover { border-color: #334155; }
+        .finding-card.border-CRITICAL { border-left: 5px solid var(--sev-critical); }
+        .finding-card.border-HIGH { border-left: 5px solid var(--sev-high); }
+        .finding-card.border-MEDIUM { border-left: 5px solid var(--sev-medium); }
+        .finding-card.border-LOW { border-left: 5px solid var(--sev-low); }
+        .finding-card.border-INFO { border-left: 5px solid var(--sev-info); }
+
+        .finding-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 0.75rem; }
+        .finding-title { font-size: 1.1rem; font-weight: 700; color: #fff; margin: 0; }
+        .target-tag { font-size: 0.8rem; background: #090d16; padding: 0.3rem 0.6rem; border-radius: 6px; border: 1px solid var(--card-border); color: #cbd5e1; white-space: nowrap; }
+
+        .finding-body { color: #cbd5e1; font-size: 0.92rem; margin-bottom: 1rem; }
+        
+        .box-remediation { background: rgba(34, 197, 94, 0.06); border: 1px solid rgba(34, 197, 94, 0.2); border-radius: 8px; padding: 1rem; margin-top: 1rem; }
+        .box-remediation-title { font-size: 0.8rem; font-weight: 700; color: var(--sev-safe); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.4rem; display: flex; align-items: center; gap: 0.4rem; }
+        
+        .box-evidence { background: #090d16; border: 1px solid #1e293b; border-radius: 8px; padding: 0.85rem 1rem; margin-top: 0.85rem; font-family: monospace; font-size: 0.82rem; color: #94a3b8; overflow-x: auto; white-space: pre-wrap; }
+
+        .ref-links { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.85rem; }
+        .ref-link { font-size: 0.75rem; color: var(--primary); text-decoration: none; background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.2); padding: 0.2rem 0.5rem; border-radius: 4px; }
+        .ref-link:hover { text-decoration: underline; background: rgba(56, 189, 248, 0.15); }
+
+        /* Filter Controls */
+        .filter-bar { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; margin-bottom: 1.5rem; }
+        .btn-filter { background: var(--card-bg); border: 1px solid var(--card-border); color: var(--text-muted); padding: 0.4rem 0.85rem; border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .btn-filter.active, .btn-filter:hover { background: #1e293b; color: #fff; border-color: var(--primary); }
+    </style>
+    <script>
+        function filterFindings(sev) {
+            const cards = document.querySelectorAll('.finding-card');
+            const btns = document.querySelectorAll('.btn-filter');
+            btns.forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+
+            cards.forEach(card => {
+                if (sev === 'ALL' || card.getAttribute('data-severity') === sev) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <!-- Top Executive Header -->
+        <div class="top-header">
+            <div>
+                <h1 class="brand-title">Net<span>Audit</span> Security Report</h1>
+                <p class="subtitle">Automated Security Posture & Asset Vulnerability Assessment</p>
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;">
+                    <strong>Authorized Scope:</strong> `127.0.0.1/32` &nbsp;|&nbsp; 
+                    <strong>Timestamp:</strong> 2026-10-07 06:07:37 UTC
+                </div>
+            </div>
+            <div class="risk-gauge">
+                <div class="risk-score-num risk-low">5.0 <span style="font-size: 1rem; color: var(--text-muted);">/ 100</span></div>
+                <div class="risk-label">LOW RISK</div>
+            </div>
+        </div>
+
+        <!-- Metric Counter Cards -->
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-title">Discovered Hosts</div>
+                <div class="metric-value">1</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-title">Open Services</div>
+                <div class="metric-value">1</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-title">Critical Vulnerabilities</div>
+                <div class="metric-value" style="color: var(--sev-critical);">0</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-title">High / Medium Risks</div>
+                <div class="metric-value" style="color: var(--sev-high);">1</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-title">Total Findings</div>
+                <div class="metric-value">2</div>
+            </div>
+        </div>
+
+        <!-- Section 1: Infrastructure Asset Inventory -->
+        <div class="section-header">
+            <h2 class="section-title">1. Discovered Asset Inventory</h2>
+        </div>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Target IP</th>
+                        <th>Hostname / PTR</th>
+                        <th>Host Status</th>
+                        <th>Discovered Open Services & Banners</th>
+                        <th>Security Issues</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <tr>
+                        <td><code>127.0.0.1</code></td>
+                        <td>kubernetes.docker.internal</td>
+                        <td><span style="color: var(--sev-safe); font-weight:700;">● UP</span></td>
+                        <td><code>TCP/445 (microsoft-ds)</code></td>
+                        <td><span class="sev-pill pill-HIGH">2 Issue(s)</span></td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Section 2: Detailed Vulnerabilities & Remediation -->
+        <div class="section-header">
+            <h2 class="section-title">2. Correlated Security Findings & Actionable Hardening Plans</h2>
+        </div>
+
+        <!-- Filter Controls -->
+        <div class="filter-bar">
+            <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 700; margin-right: 0.5rem;">FILTER SEVERITY:</span>
+            <button class="btn-filter active" onclick="filterFindings('ALL')">ALL ({len(findings)})</button>
+            <button class="btn-filter" onclick="filterFindings('CRITICAL')">CRITICAL ({sev_counts['CRITICAL']})</button>
+            <button class="btn-filter" onclick="filterFindings('HIGH')">HIGH ({sev_counts['HIGH']})</button>
+            <button class="btn-filter" onclick="filterFindings('MEDIUM')">MEDIUM ({sev_counts['MEDIUM']})</button>
+            <button class="btn-filter" onclick="filterFindings('LOW')">LOW ({sev_counts['LOW']})</button>
+            <button class="btn-filter" onclick="filterFindings('INFO')">INFO ({sev_counts['INFO']})</button>
+        </div>
+
+        <div class="finding-card border-MEDIUM" data-severity="MEDIUM">
+            <div class="finding-head">
+                <div>
+                    <span class="sev-pill pill-MEDIUM">MEDIUM</span>
+                    <h3 class="finding-title" style="display:inline; margin-left: 0.5rem;">Direct SMB Network Service Exposure on Port 445</h3>
+                </div>
+                <div class="target-tag">Target: <code>127.0.0.1:445</code></div>
+            </div>
+            
+            <div class="finding-body">
+                <p><strong>Description:</strong> Server Message Block (SMB) service is accessible on 127.0.0.1:445. Exposing SMB to untrusted network segments increases attack surface for lateral movement and credential theft.</p>
+                <div class="box-evidence"><strong>RAW EVIDENCE LOG:</strong>
+Service active on 127.0.0.1:445. Protocol response: Connected</div>
+                <div class="box-remediation">
+                    <div class="box-remediation-title">🛡️ Recommended Hardening & Remediation Action</div>
+                    <div>Restrict SMB access via firewall rules (block TCP ports 139 and 445 from external networks). Enforce network segmentation for management and file sharing interfaces.</div>
+                </div>
+                <div class="ref-links"><strong>References:</strong> <a class="ref-link" href="https://learn.microsoft.com/en-us/windows-server/storage/file-server/smb-secure-traffic" target="_blank">https://learn.microsoft.com/en-us/windows-server/storage/file-server/smb-secure-traffic</a> <a class="ref-link" href="https://cheatsheetseries.owasp.org/cheatsheets/Network_Security_Cheat_Sheet.html" target="_blank">https://cheatsheetseries.owasp.org/cheatsheets/Network_Security_Cheat_Sheet.html</a></div>
+            </div>
+        </div>
+
+        <div class="finding-card border-LOW" data-severity="LOW">
+            <div class="finding-head">
+                <div>
+                    <span class="sev-pill pill-LOW">LOW</span>
+                    <h3 class="finding-title" style="display:inline; margin-left: 0.5rem;">SMB Security Policy & Message Signing Hardening Requirement</h3>
+                </div>
+                <div class="target-tag">Target: <code>127.0.0.1:445</code></div>
+            </div>
+            
+            <div class="finding-body">
+                <p><strong>Description:</strong> SMB communication should enforce required SMB Message Signing to prevent man-in-the-middle (MitM) packet manipulation and relay attacks.</p>
+                
+                <div class="box-remediation">
+                    <div class="box-remediation-title">🛡️ Recommended Hardening & Remediation Action</div>
+                    <div>Enforce SMB Signing in Group Policy or registry:<br>Set-SmbServerConfiguration -RequireSecuritySignature $true -Force</div>
+                </div>
+                <div class="ref-links"><strong>References:</strong> <a class="ref-link" href="https://learn.microsoft.com/en-us/troubleshoot/windows-server/networking/overview-of-smb-signing" target="_blank">https://learn.microsoft.com/en-us/troubleshoot/windows-server/networking/overview-of-smb-signing</a></div>
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>
